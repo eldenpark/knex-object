@@ -2,6 +2,7 @@ import {
   Column,
   KnexEntity,
   KnexEntityFactory,
+  Table,
 } from 'knex-object';
 import knexInstance from '@@src/knex';
 

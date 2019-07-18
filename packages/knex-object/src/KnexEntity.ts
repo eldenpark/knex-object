@@ -1,33 +1,38 @@
 import Knex from 'knex';
 import { logger } from 'jege/server';
 
+import {
+  KNEX,
+  TABLE_DEFINITION,
+} from './constants';
+
 const log = logger('[knex-object]');
 
 class KnexEntity {
-  static __tableDefinition = {};
-  static __knex: Knex;
+  static [TABLE_DEFINITION] = {};
+  static [KNEX]: Knex;
 
   static get knex(): Knex {
-    if (this.__knex === undefined) {
+    if (this[KNEX] === undefined) {
       log('KnexEntity(): knex() is not defined, object: %s', this.name);
       throw new Error('knex() is not defined');
     }
-    return this.__knex;
+    return this[KNEX];
   }
 
   static set knex(knex: Knex) {
-    this.__knex = knex;
+    this[KNEX] = knex;
   }
 
   static get tableDefinition() {
-    if (this.__tableDefinition === undefined) {
+    if (this[TABLE_DEFINITION] === undefined) {
       log(
         'KnexEntity(): __tableDefinition is missing. Most likely it is mishandled. object: %s',
         this.name,
       );
       throw new Error('tableDefinition() is missing');
     }
-    return this.__tableDefinition;
+    return this[TABLE_DEFINITION];
   }
 
   static get tableName(): string {
