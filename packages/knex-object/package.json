@@ -1,0 +1,27 @@
+{
+  "author": "Elden S. Park",
+  "dependencies": {
+    "jege": "^0.4.0",
+    "yargs": "^13.2.4"
+  },
+  "devDependencies": {
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "lib/index.js",
+  "name": "knex-object",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eldeni/knex-object.git",
+    "directory": "packages/knex-object"
+  },
+  "scripts": {
+  },
+  "version": "0.0.0"
+}
