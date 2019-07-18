@@ -10,9 +10,19 @@ const Entity: typeof KnexEntity = KnexEntityFactory({
 });
 
 class EntityBase extends Entity {
-  @Column('temp')
+  @Column({
+    type: ['timestamp'],
+  })
   created_at: Date;
+
+  @Column({
+    type: ['increments'],
+  })
   id: string;
+
+  @Column({
+    type: ['timestamp'],
+  })
   updated_at: Date;
 }
 
