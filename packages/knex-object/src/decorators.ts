@@ -6,12 +6,19 @@ import {
 } from './constants';
 
 // const log = logger('[knex-object]');
-// @Table({})
+
+// @Table({
+//   index: [
+//     [['p', 'q']],
+//   ],
+// })
 // class A {
 //   @Column({
 //     type: ['string', [12]],
 //   })
-//   p;
+//   paa;
+//   q;
+//   r;
 // }
 
 export function Column(columnArgs: ColumnArgs) {
@@ -34,7 +41,6 @@ export function Column(columnArgs: ColumnArgs) {
     }
 
     function initializer() {
-      console.log('444444 initializer', this[TABLE_DEFINITION]);
       this[TABLE_DEFINITION][key] = columnArgs;
       return {
         __generatedFieldNotTobeUsed: 0,
@@ -83,9 +89,7 @@ export function Table({
         writable: false,
       },
       initializer: function initializer() {
-        this[TABLE_DEFINITION][TABLE_INDEX] = {
-          a: 1,
-        };
+        this[TABLE_DEFINITION][TABLE_INDEX] = index;
         return index;
       },
       key: TABLE_INDEX,
@@ -136,7 +140,12 @@ type TextType = ['text'];
 type TimestampType = ['timestamp'];
 
 interface TableArgs {
-  index?;
+  index?: TableIndex[];
+}
+
+interface TableIndex {
+  columns: string[];
+  key?: string;
 }
 
 interface ClassElement {
