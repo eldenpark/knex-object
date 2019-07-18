@@ -1,28 +1,29 @@
-import { logger } from 'jege/server';
+// import { logger } from 'jege/server';
 
 import {
   TABLE_DEFINITION,
   TABLE_INDEX,
 } from './constants';
 
-const log = logger('[knex-object]');
-
-// const KEY_INDEX = '__index';
-// const KEY_TABLE_DEFINITION = '__tableDefinition';
-
-// Column({
-//   type: ['string', [12]],
-// });
+// const log = logger('[knex-object]');
+// @Table({})
+// class A {
+//   @Column({
+//     type: ['string', [12]],
+//   })
+//   p;
+// }
 
 export function Column(columnArgs: ColumnArgs) {
   // `...args` to prevent TypeScript warning which has different decorator spec
-  return function ColumnDecorator(target: ClassMemberElement, ...args) { // eslint-disable-line
+  return function ColumnDecorator(target, ...args) { // eslint-disable-line
     console.log('ColumnDecorator(): target: %o', target);
+
     const {
       key,
       kind,
       placement,
-    } = target;
+    } = target as ClassMemberElement;
 
     if (kind !== 'field') {
       throw new Error(`ColumnDecorator(): '@Column' should be put onto field`);
@@ -66,9 +67,10 @@ export function Table({
   index,
 }: TableArgs) {
   // `...args` to prevent TypeScript warning which has different decorator spec
-  return function TableDecorator(target: ClassElement, ...args) { // eslint-disable-line
+  return function TableDecorator(target, ...args) { // eslint-disable-line
     console.log(111111, target);
-    const { elements, kind } = target;
+
+    const { elements, kind } = target as ClassElement;
 
     if (kind !== 'class') {
       throw new Error(`TableDecorator(): '@Table' should be put onto class`);

@@ -5,7 +5,7 @@ import {
 
 import Entity from '@@src/entities/Entity';
 
-@Table()
+@Table({})
 class Foo extends Entity {
   @Column({
     type: ['string', [255]],
