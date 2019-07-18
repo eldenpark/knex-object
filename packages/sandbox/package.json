@@ -1,7 +1,10 @@
 {
   "author": "Elden S. Park",
   "dependencies": {
-    "jege": "^0.4.0"
+    "jege": "^0.4.0",
+    "knex": "^0.19.0",
+    "knex-object": "^0.0.1",
+    "pg": "^7.11.0"
   },
   "devDependencies": {
     "@babel/register": "^7.4.4"
@@ -11,5 +14,10 @@
   "license": "ISC",
   "name": "sandbox",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eldeni/knex-object.git",
+    "directory": "packages/sandbox"
+  },
   "version": "0.0.1"
 }

@@ -14,7 +14,8 @@ function launch() {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
   });
 
-  require('../src/server/local.ts');
+  const { default: main } = require('../src/main');
+  main();
 }
 
 if (require.main === module) {

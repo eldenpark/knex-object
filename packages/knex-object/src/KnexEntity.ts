@@ -5,10 +5,18 @@ const log = logger('[knex-object]');
 
 class KnexEntity {
   static __tableDefinition = {};
+  static __knex: Knex;
 
   static get knex(): Knex {
-    log('KnexEntity(): knex() is not defined, object: %s', this.name);
-    throw new Error('knex() is not defined');
+    if (this.__knex === undefined) {
+      log('KnexEntity(): knex() is not defined, object: %s', this.name);
+      throw new Error('knex() is not defined');
+    }
+    return this.__knex;
+  }
+
+  static set knex(knex: Knex) {
+    this.__knex = knex;
   }
 
   static get tableDefinition() {
