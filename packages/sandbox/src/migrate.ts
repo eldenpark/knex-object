@@ -11,18 +11,19 @@ import Foo from '@@src/entities/FooTar';
 
 const log = logger('[sandbox]');
 
-export default async function migrate() {
-  const entities: typeof KnexEntity[] = [
-    Bar,
-    Foo,
-  ];
+const entities: typeof KnexEntity[] = [
+  Bar,
+  Foo,
+];
 
-  log('migrate(): entities: %s', entities.map(({ name }) => name));
-  const schemaDestroyer = getSchemaDestroyer(entities);
-  const destroyResult = await schemaDestroyer(knex);
-  log('migrate(): destroyResult: %j', destroyResult);
-
+export async function up() {
+  log('up(): entities: %s', entities.map(({ name }) => name));
   const schemaBuilder = getSchemaBuilder(entities);
-  const buildResult = await schemaBuilder(knex);
-  log('migrate(): buildResult: %j', buildResult);
+  return schemaBuilder(knex);
+}
+
+export function down() {
+  log('down(): entities: %s', entities.map(({ name }) => name));
+  const schemaDestroyer = getSchemaDestroyer(entities);
+  return schemaDestroyer(knex);
 }

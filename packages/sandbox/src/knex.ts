@@ -24,3 +24,7 @@ const config = {
 const knex = Knex(config);
 
 export default knex;
+
+export {
+  config,
+};
