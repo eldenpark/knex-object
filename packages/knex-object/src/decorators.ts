@@ -4,6 +4,7 @@ import { logger } from 'jege/server';
 import KnexEntity, {
   ColumnDefinition,
   TableIndex,
+  EntityDefinition,
 } from './KnexEntity';
 import {
   IS_KNEX_ENTITY,
@@ -46,7 +47,7 @@ export function Column(columnArgs: ColumnArgs) {
       if (this[SHARED_ENTITY_DEFINITIONS][entityName] === undefined) {
         this[SHARED_ENTITY_DEFINITIONS][entityName] = {
           [key]: columnArgs,
-        };
+        } as EntityDefinition;
       } else {
         this[SHARED_ENTITY_DEFINITIONS][entityName][key as any] = columnArgs;
       }
@@ -100,10 +101,17 @@ export function Table({
           );
         }
         const ancestorEntities = getAncestorEntities(this);
-        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index;
         this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES] = ancestorEntities;
+        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index;
 
-        log(`Table(): decorated ${chalk.green(entityName)}, %j`, this[SHARED_ENTITY_DEFINITIONS]);
+        log(
+          `Table(): decorated ${chalk.green('%s')}, tableName: %s, entityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
+          entityName,
+          this.tableName,
+          this[SHARED_ENTITY_DEFINITIONS][entityName],
+          this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES],
+          this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX],
+        );
         return insignificantPropertyValue;
       },
       key: TABLE_INDEX,

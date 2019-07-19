@@ -1,4 +1,4 @@
-const ANCESTOR_ENTITIES = Symbol('ancestorEntities');
+const ANCESTOR_ENTITIES = Symbol('ancestoryEntites');
 const IS_KNEX_ENTITY = Symbol('isKnexEntity');
 const KNEX = Symbol('knex');
 const PROTOTYPE_PROBE_DELIMITER = Symbol('prototypeProbeDelimiter');

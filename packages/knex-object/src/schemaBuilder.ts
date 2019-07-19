@@ -5,10 +5,14 @@ import { logger } from 'jege/server';
 import KnexEntity, {
   DataType,
   EntityDefinition,
+  SharedEntityDefinitions,
   TableIndex,
 } from './KnexEntity';
 import { requireNonNull } from './utils';
-import { TABLE_INDEX } from './constants';
+import {
+  ANCESTOR_ENTITIES,
+  TABLE_INDEX,
+} from './constants';
 
 const log = logger('[knex-object]');
 
@@ -20,16 +24,20 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
         entityDefinitions,
         name: entityName,
       } = entity;
-      const entityDefinition = entityDefinitions[entityName];
+      const aggregateEntityDefinition = aggreteEntityDefinition(entityName, entityDefinitions);
+
       log(
-        `schemaBuilder(): entity ${chalk.green('%s')} is being created with: %j`,
+        `schemaBuilder(): entity ${chalk.green('%s')}, tableName: %s, aggregateEntityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
         entityName,
-        entityDefinition,
+        entity.tableName,
+        aggregateEntityDefinition,
+        aggregateEntityDefinition[ANCESTOR_ENTITIES],
+        aggregateEntityDefinition[TABLE_INDEX],
       );
 
       knexSchemaBuilder = knexSchemaBuilder.createTable(entity.tableName, (table) => {
-        appendTableColumns(table, entityDefinition);
-        appendTableIndices(table, entityDefinition[TABLE_INDEX]);
+        appendTableColumns(table, aggregateEntityDefinition);
+        appendTableIndices(table, aggregateEntityDefinition[TABLE_INDEX]);
       });
     });
     return knexSchemaBuilder;
@@ -41,7 +49,8 @@ export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
     let chained = knex.schema;
     entities.forEach((entity) => {
       log(
-        `schemaDestroyer(): entity ${chalk.green('%s')} is scheduled to be destroyed if exists`,
+        `schemaDestroyer(): destroying if exists, entity: ${chalk.green('%s')}, tableName: %s`,
+        entity.name,
         entity.tableName,
       );
       chained = chained.dropTableIfExists(entity.tableName);
@@ -78,4 +87,30 @@ function appendTableIndices(table: Knex.CreateTableBuilder, tableIndices?: Table
     });
   }
   return _table;
+}
+
+function aggreteEntityDefinition(entityName: string, entityDefinitions: SharedEntityDefinitions) {
+  const entityDefinition = entityDefinitions[entityName];
+  requireNonNull(entityDefinition, 'aggreteEntityDefinition(): entityDefinition should exist');
+
+  let aggregateEntityDefinition: EntityDefinition = {
+    [TABLE_INDEX]: [],
+  };
+
+  if (entityDefinition[ANCESTOR_ENTITIES]) {
+    entityDefinition[ANCESTOR_ENTITIES]!.forEach((ancestor) => {
+      const tableIndex = entityDefinitions[ancestor][TABLE_INDEX];
+      if (tableIndex) {
+        aggregateEntityDefinition[TABLE_INDEX]!.concat(tableIndex);
+      }
+      aggregateEntityDefinition = {
+        ...aggregateEntityDefinition,
+        ...entityDefinitions[ancestor],
+      };
+    });
+  }
+  return {
+    ...aggregateEntityDefinition,
+    ...entityDefinition,
+  };
 }

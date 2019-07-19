@@ -5,9 +5,9 @@ import {
 } from 'knex-object';
 import { logger } from 'jege/server';
 
-import knex from '@@src/knex';
 import Bar from '@@src/entities/BarTar';
 import Foo from '@@src/entities/FooTar';
+import knex from '@@src/knex';
 
 const log = logger('[sandbox]');
 

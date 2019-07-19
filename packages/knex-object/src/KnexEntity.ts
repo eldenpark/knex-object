@@ -32,7 +32,7 @@ class KnexEntity {
   static get entityDefinitions() {
     if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
       log(
-        'KnexEntity(): __tableDefinition is missing. Most likely it is mishandled. object: %s',
+        'entityDefinitions(): __tableDefinition is missing. Most likely it is mishandled. object: %s',
         this.name,
       );
       throw new Error('tableDefinition() is missing');
