@@ -12,6 +12,7 @@ export default async function main() {
     log('main(): connection success: %j', connectionSuccess);
 
     migrate();
+    process.exit(0);
   } catch (err) {
     log('main(): error connecting: %o', err);
   }

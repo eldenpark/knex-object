@@ -1,6 +1,7 @@
 {
   "author": "Elden S. Park",
   "dependencies": {
+    "chalk": "^2.4.2",
     "jege": "^0.4.0",
     "knex": "^0.19.0",
     "yargs": "^13.2.4"

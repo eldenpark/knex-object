@@ -1,11 +1,18 @@
-// import { logger } from 'jege/server';
+import chalk from 'chalk';
+import { logger } from 'jege/server';
 
+import KnexEntity, {
+  ColumnDefinition,
+  TableIndex,
+} from './KnexEntity';
 import {
-  TABLE_DEFINITION,
+  IS_KNEX_ENTITY,
+  SHARED_ENTITY_DEFINITIONS,
   TABLE_INDEX,
+  ANCESTOR_ENTITIES,
 } from './constants';
 
-// const log = logger('[knex-object]');
+const log = logger('[knex-object]');
 
 // @Table({
 //   index: [
@@ -21,11 +28,13 @@ import {
 //   r;
 // }
 
+const insignificantObject = {
+  __generatedFieldNotTobeUsed: 1,
+};
+
 export function Column(columnArgs: ColumnArgs) {
   // `...args` to prevent TypeScript warning which has different decorator spec
   return function ColumnDecorator(target, ...args) { // eslint-disable-line
-    console.log('ColumnDecorator(): target: %o', target);
-
     const {
       key,
       kind,
@@ -40,17 +49,28 @@ export function Column(columnArgs: ColumnArgs) {
       throw new Error(`ColumnDecorator(): '@Column' should be put onto instance variable`);
     }
 
-    function initializer() {
-      this[TABLE_DEFINITION][key] = columnArgs;
-      return {
-        __generatedFieldNotTobeUsed: 0,
-      };
+    function initializer(this: typeof KnexEntity) {
+      const entityName = this.name;
+      if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
+        throw new Error(
+          `ColumnDecorator(): '@Column may have attached onto non KnexEntity, ${this.name}`,
+        );
+      }
+
+      if (this[SHARED_ENTITY_DEFINITIONS][entityName] === undefined) {
+        this[SHARED_ENTITY_DEFINITIONS][entityName] = {
+          [key]: columnArgs,
+        };
+      } else {
+        this[SHARED_ENTITY_DEFINITIONS][entityName][key as any] = columnArgs;
+      }
+
+      return insignificantObject;
     }
 
     const newDescriptor = {
       configurable: false,
       enumerable: false,
-      value: undefined,
       writable: false,
     };
 
@@ -74,8 +94,6 @@ export function Table({
 }: TableArgs) {
   // `...args` to prevent TypeScript warning which has different decorator spec
   return function TableDecorator(target, ...args) { // eslint-disable-line
-    console.log(111111, target);
-
     const { elements, kind } = target as ClassElement;
 
     if (kind !== 'class') {
@@ -89,8 +107,18 @@ export function Table({
         writable: false,
       },
       initializer: function initializer() {
-        this[TABLE_DEFINITION][TABLE_INDEX] = index;
-        return index;
+        const entityName = this.name;
+        if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
+          throw new Error(
+            `ColumnDecorator(): '@Table may have attached onto non KnexEntity, ${this.name}`,
+          );
+        }
+        const ancestorEntities = getAncestorEntities(this);
+        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index;
+        this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES] = ancestorEntities;
+
+        log(`Table(): decorated ${chalk.green(entityName)}, %j`, this[SHARED_ENTITY_DEFINITIONS]);
+        return insignificantObject;
       },
       key: TABLE_INDEX,
       kind: 'field',
@@ -107,45 +135,25 @@ export function Table({
   };
 }
 
-interface ColumnArgs {
-  comment?: string;
-  defaultTo?: any;
-  notNullable?: boolean;
-  primary?: boolean;
-  type: DataType;
-  unique?: boolean;
+function getAncestorEntities(entity: typeof KnexEntity) {
+  const ancestors: string[] = [];
+  function getPrototype(obj) {
+    const constructorName = obj.constructor.name;
+    if (!obj.constructor[IS_KNEX_ENTITY] || constructorName === '__generatedKnexEntity') {
+      return;
+    }
+    ancestors.push(obj.constructor.name);
+    getPrototype(Object.getPrototypeOf(obj));
+  }
+
+  getPrototype(entity.prototype);
+  return ancestors;
 }
 
-type DataType
-= BigIntegerType
-| BooleanType
-| DateTimeType
-| EnumDataType
-| FloatDataType
-| IncrementsType
-| IntegerType
-| StringDataType
-| TextType
-| TimestampType;
-
-type BigIntegerType = ['bigInteger'];
-type BooleanType = ['boolean'];
-type DateTimeType = ['datetime'];
-type EnumDataType = ['enu', [string[]]];
-type FloatDataType = ['float', [number?, number?]?];
-type IncrementsType = ['increments'];
-type IntegerType = ['integer'];
-type StringDataType = ['string', [number?]?];
-type TextType = ['text'];
-type TimestampType = ['timestamp'];
+type ColumnArgs = ColumnDefinition;
 
 interface TableArgs {
   index?: TableIndex[];
-}
-
-interface TableIndex {
-  columns: string[];
-  key?: string;
 }
 
 interface ClassElement {

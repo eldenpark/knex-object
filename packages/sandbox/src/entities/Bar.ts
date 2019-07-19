@@ -8,25 +8,26 @@ import Entity from '@@src/entities/Entity';
 @Table({
   index: [
     {
-      columns: ['foo_column1'],
+      columns: ['bar_column1', 'bar_column3'],
+      key: 'bar_index2',
     },
   ],
 })
-class Foo extends Entity {
+class Bar extends Entity {
   @Column({
     type: ['string', [255]],
   })
-  foo_column1: string;
+  bar_column1: string;
 
   @Column({
     type: ['float'],
   })
-  foo_column2: number;
+  bar_column2: number;
 
   @Column({
     type: ['string', [32]],
   })
-  foo_column3: string;
+  bar_column3: string;
 }
 
-export default Foo;
+export default Bar;
