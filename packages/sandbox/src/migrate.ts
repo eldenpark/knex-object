@@ -19,8 +19,10 @@ export default async function migrate() {
 
   log('migrate(): entities: %s', entities.map(({ name }) => name));
   const schemaDestroyer = getSchemaDestroyer(entities);
-  await schemaDestroyer(knex);
+  const destroyResult = await schemaDestroyer(knex);
+  log('migrate(): destroyResult: %j', destroyResult);
 
   const schemaBuilder = getSchemaBuilder(entities);
-  await schemaBuilder(knex);
+  const buildResult = await schemaBuilder(knex);
+  log('migrate(): buildResult: %j', buildResult);
 }

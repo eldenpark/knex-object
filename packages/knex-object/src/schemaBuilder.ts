@@ -4,6 +4,8 @@ import { logger } from 'jege/server';
 
 import KnexEntity, {
   DataType,
+  EntityDefinition,
+  TableIndex,
 } from './KnexEntity';
 import { requireNonNull } from './utils';
 import { TABLE_INDEX } from './constants';
@@ -26,30 +28,8 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
       );
 
       knexSchemaBuilder = knexSchemaBuilder.createTable(entity.tableName, (table) => {
-        // console.log(333, entity.tableName);
-
-        Object.entries(entityDefinition)
-          .forEach(([columnName, columnDefinition]) => {
-            // console.log(444, columnName);
-            const [typeLabel, typeFnArgs]: DataType = columnDefinition.type;
-            requireNonNull(typeLabel, 'type label, e.g. float(), should be confifugured');
-            let knexColumnBuilder = table[typeLabel](columnName, ...(typeFnArgs || []));
-
-            Object.entries(columnDefinition)
-              .forEach(([columnModifier, columnMidifierArgs]) => {
-                // console.log(555, columnModifier);
-                if (columnModifier !== 'type') {
-                  const fnArgs = columnMidifierArgs.length ? columnMidifierArgs : [];
-                  knexColumnBuilder = knexColumnBuilder[columnModifier](...fnArgs);
-                }
-              });
-          });
-
-        if (entityDefinition[TABLE_INDEX]) {
-          entityDefinition[TABLE_INDEX]!.forEach(({ columns, key }) => {
-            table.index(columns, key);
-          });
-        }
+        appendTableColumns(table, entityDefinition);
+        appendTableIndices(table, entityDefinition[TABLE_INDEX]);
       });
     });
     return knexSchemaBuilder;
@@ -68,4 +48,34 @@ export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
     });
     return chained;
   };
+}
+
+function appendTableColumns(table: Knex.CreateTableBuilder, entityDefinition: EntityDefinition) {
+  Object.entries(entityDefinition)
+    .forEach(([columnName, columnDefinition]) => {
+      const [typeLabel, typeFnArgs]: DataType = columnDefinition.type;
+      requireNonNull(typeLabel, 'type label, e.g. float(), should be confifugured');
+      const knexColumnBuilder: Knex.ColumnBuilder = table[typeLabel](
+        columnName,
+        ...(typeFnArgs || []),
+      );
+
+      Object.entries(columnDefinition)
+        .forEach(([columnModifier, columnMidifierArgs]) => {
+          if (columnModifier !== 'type') {
+            const fnArgs = columnMidifierArgs.length ? columnMidifierArgs : [];
+            knexColumnBuilder[columnModifier](...fnArgs);
+          }
+        });
+    });
+}
+
+function appendTableIndices(table: Knex.CreateTableBuilder, tableIndices?: TableIndex[]) {
+  let _table = table;
+  if (tableIndices) {
+    tableIndices.forEach(({ columns, key }) => {
+      _table = _table.index(columns, key);
+    });
+  }
+  return _table;
 }
