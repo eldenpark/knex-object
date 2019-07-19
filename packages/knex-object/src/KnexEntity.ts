@@ -50,7 +50,7 @@ export default KnexEntity;
 export function KnexEntityFactory({
   knex,
 }: KnexEntityFactoryArgs) {
-  return class __generatedKnexEntity extends KnexEntity {
+  return class DO_NOT_CHANGE__generatedKnexEntity extends KnexEntity { // eslint-disable-line
     static knex = knex;
   };
 }
@@ -71,15 +71,15 @@ export interface TableIndex {
 }
 
 export interface ColumnDefinition {
-  comment?: string;
-  defaultTo?: any;
+  comment?: [string];
+  defaultTo?: [any];
   notNullable?: boolean;
   primary?: boolean;
   type: DataType;
   unique?: boolean;
 }
 
-type DataType
+export type DataType
 = BigIntegerType
 | BooleanType
 | DateTimeType

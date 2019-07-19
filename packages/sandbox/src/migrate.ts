@@ -1,5 +1,5 @@
 import {
-  // getSchemaBuilder,
+  getSchemaBuilder,
   getSchemaDestroyer,
   KnexEntity,
 } from 'knex-object';
@@ -21,6 +21,6 @@ export default async function migrate() {
   const schemaDestroyer = getSchemaDestroyer(entities);
   await schemaDestroyer(knex);
 
-  // const schemaBuilder = getSchemaBuilder(entities);
-  // await schemaBuilder(knex);
+  const schemaBuilder = getSchemaBuilder(entities);
+  await schemaBuilder(knex);
 }

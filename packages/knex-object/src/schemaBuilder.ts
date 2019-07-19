@@ -2,64 +2,66 @@ import chalk from 'chalk';
 import Knex from 'knex';
 import { logger } from 'jege/server';
 
-import KnexEntity from './KnexEntity';
+import KnexEntity, {
+  DataType,
+} from './KnexEntity';
+import { requireNonNull } from './utils';
+import { TABLE_INDEX } from './constants';
 
 const log = logger('[knex-object]');
 
 export function getSchemaBuilder(entities: typeof KnexEntity[]) {
-  const schemaBuildFn = (knex) => knex.schama;
-  entities.forEach((entity) => {
-    const {
-      entityDefinitions,
-      name: entityName,
-    } = entity;
-    console.log('getSchemaBuilder(): name: %s, def: %j', entityName, entityDefinitions);
+  return function schemaBuilder(knex: Knex) {
+    let knexSchemaBuilder = knex.schema;
+    entities.forEach((entity) => {
+      const {
+        entityDefinitions,
+        name: entityName,
+      } = entity;
+      const entityDefinition = entityDefinitions[entityName];
+      log(
+        `schemaBuilder(): entity ${chalk.green('%s')} is being created with: %j`,
+        entityName,
+        entityDefinition,
+      );
 
-    // createEntityBuilder(knex, entityDefinitions[entityName]);
-    // const entityDefinitions[entity.name]);
-    // return (knex: Knex) => {
-    //   knex.create
-    // };
-    // const { tableDefinition } = entity;
-    // console.log(2, tableDefinition);
+      knexSchemaBuilder = knexSchemaBuilder.createTable(entity.tableName, (table) => {
+        // console.log(333, entity.tableName);
 
-    // return knex.schema
-    //   .createTable(Product.tableName, (table) => {
-    //     setEntityBaseProperties(table);
-    //     table.enum('currency', Object.values(Currency));
-    //     table.string('img_url', 512)
-    //       .notNullable();
-    //     table.string('label', 255)
-    //       .notNullable();
-    //     table.float('price')
-    //       .notNullable();
-    //     table.string('product_no', 255)
-    //       .notNullable()
-    //       .unique();
-    //   })
+        Object.entries(entityDefinition)
+          .forEach(([columnName, columnDefinition]) => {
+            // console.log(444, columnName);
+            const [typeLabel, typeFnArgs]: DataType = columnDefinition.type;
+            requireNonNull(typeLabel, 'type label, e.g. float(), should be confifugured');
+            let knexColumnBuilder = table[typeLabel](columnName, ...(typeFnArgs || []));
 
-    //   .createTable(Order.tableName, (table) => {
-    //     setEntityBaseProperties(table);
-    //     table.string('order_no', 255)
-    //       .notNullable();
-    //     table.enu('payment_status', Object.values(PaymentStatus))
-    //       .defaultTo(PaymentStatus.UNPAID)
-    //       .notNullable();
-    //     table.string('user_no', 255)
-    //       .notNullable();
-    //   })
+            Object.entries(columnDefinition)
+              .forEach(([columnModifier, columnMidifierArgs]) => {
+                // console.log(555, columnModifier);
+                if (columnModifier !== 'type') {
+                  const fnArgs = columnMidifierArgs.length ? columnMidifierArgs : [];
+                  knexColumnBuilder = knexColumnBuilder[columnModifier](...fnArgs);
+                }
+              });
+          });
 
-    // .dropTableIfExists(Product.tableName)
-  });
-  return (knex: Knex) => schemaBuildFn(knex);
+        if (entityDefinition[TABLE_INDEX]) {
+          entityDefinition[TABLE_INDEX]!.forEach(({ columns, key }) => {
+            table.index(columns, key);
+          });
+        }
+      });
+    });
+    return knexSchemaBuilder;
+  };
 }
 
 export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
-  return (knex: Knex) => {
+  return function schemaDestroyer(knex: Knex) {
     let chained = knex.schema;
     entities.forEach((entity) => {
       log(
-        `getSchemaDestroyer(): ${chalk.green('%s')} is scheduled to be destroyed`,
+        `schemaDestroyer(): entity ${chalk.green('%s')} is scheduled to be destroyed if exists`,
         entity.tableName,
       );
       chained = chained.dropTableIfExists(entity.tableName);
@@ -67,17 +69,3 @@ export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
     return chained;
   };
 }
-
-// function createEntityBuilder(knex: Knex, entityDefinition: EntityDefinition) {
-//   Object.entries(entityDefinition)
-//     .forEach(([key, value]) => {
-//       const { type } = value;
-//       // chain(acc, (acc) => {
-
-//       // });
-//     });
-// }
-
-// function chain<T>(acc: T, fn: (arg: T) => T) {
-//   return fn(acc);
-// }

@@ -14,21 +14,7 @@ import {
 
 const log = logger('[knex-object]');
 
-// @Table({
-//   index: [
-//     [['p', 'q']],
-//   ],
-// })
-// class A {
-//   @Column({
-//     type: ['string', [12]],
-//   })
-//   paa;
-//   q;
-//   r;
-// }
-
-const insignificantObject = {
+const insignificantPropertyValue = {
   __generatedFieldNotTobeUsed: 1,
 };
 
@@ -65,7 +51,7 @@ export function Column(columnArgs: ColumnArgs) {
         this[SHARED_ENTITY_DEFINITIONS][entityName][key as any] = columnArgs;
       }
 
-      return insignificantObject;
+      return insignificantPropertyValue;
     }
 
     const newDescriptor = {
@@ -118,7 +104,7 @@ export function Table({
         this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES] = ancestorEntities;
 
         log(`Table(): decorated ${chalk.green(entityName)}, %j`, this[SHARED_ENTITY_DEFINITIONS]);
-        return insignificantObject;
+        return insignificantPropertyValue;
       },
       key: TABLE_INDEX,
       kind: 'field',
@@ -139,7 +125,8 @@ function getAncestorEntities(entity: typeof KnexEntity) {
   const ancestors: string[] = [];
   function getPrototypeRecursive(obj) {
     const constructorName = obj.constructor.name;
-    if (!obj.constructor[IS_KNEX_ENTITY] || constructorName === '__generatedKnexEntity') {
+    if (!obj.constructor[IS_KNEX_ENTITY]
+      || constructorName === 'DO_NOT_CHANGE__generatedKnexEntity') {
       return;
     }
     ancestors.push(obj.constructor.name);

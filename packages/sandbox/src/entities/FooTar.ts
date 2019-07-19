@@ -16,12 +16,14 @@ class FooTar extends Entity {
   static tableName = 'intentionally_different_name';
 
   @Column({
+    defaultTo: ['power'],
     type: ['string', [255]],
   })
   foo_column1: string;
 
   @Column({
     type: ['float'],
+    unique: true,
   })
   foo_column2: number;
 

@@ -15,7 +15,11 @@ function launch() {
   });
 
   const { default: main } = require('../src/main');
-  main();
+  main()
+    .then((result) => {
+      log('launch(): process ends with result: %s', result);
+      process.exit(0);
+    });
 }
 
 if (require.main === module) {
