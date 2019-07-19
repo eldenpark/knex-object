@@ -11,7 +11,7 @@ export default async function main() {
     const connectionSuccess = await knex.raw('select now()');
     log('main(): connection success: %j', connectionSuccess);
 
-    migrate();
+    await migrate();
     process.exit(0);
   } catch (err) {
     log('main(): error connecting: %o', err);

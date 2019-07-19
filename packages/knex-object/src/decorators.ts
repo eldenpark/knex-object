@@ -137,16 +137,16 @@ export function Table({
 
 function getAncestorEntities(entity: typeof KnexEntity) {
   const ancestors: string[] = [];
-  function getPrototype(obj) {
+  function getPrototypeRecursive(obj) {
     const constructorName = obj.constructor.name;
     if (!obj.constructor[IS_KNEX_ENTITY] || constructorName === '__generatedKnexEntity') {
       return;
     }
     ancestors.push(obj.constructor.name);
-    getPrototype(Object.getPrototypeOf(obj));
+    getPrototypeRecursive(Object.getPrototypeOf(obj));
   }
 
-  getPrototype(entity.prototype);
+  getPrototypeRecursive(entity.prototype);
   return ancestors;
 }
 

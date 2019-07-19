@@ -8,13 +8,14 @@ import {
   SHARED_ENTITY_DEFINITIONS,
   TABLE_INDEX,
 } from './constants';
+import { toSnakeCase } from './utils';
 
 const log = logger('[knex-object]');
 
 class KnexEntity {
   static [IS_KNEX_ENTITY] = true;
   static [KNEX]: Knex;
-  static [SHARED_ENTITY_DEFINITIONS]: SharedTableDefinitions = {};
+  static [SHARED_ENTITY_DEFINITIONS]: SharedEntityDefinitions = {};
 
   static get knex(): Knex {
     if (this[KNEX] === undefined) {
@@ -40,8 +41,7 @@ class KnexEntity {
   }
 
   static get tableName(): string {
-    log('KenxEntity(): tableName is not defined, object: %s', this.name);
-    throw new Error('tableName is not defined');
+    return toSnakeCase(this.name);
   }
 }
 
@@ -55,12 +55,14 @@ export function KnexEntityFactory({
   };
 }
 
-export interface SharedTableDefinitions {
-  [entityName: string]: {
-    [ANCESTOR_ENTITIES]?: string[];
-    [TABLE_INDEX]?: TableIndex[];
-    [columnName: string]: ColumnDefinition;
-  };
+export interface SharedEntityDefinitions {
+  [entityName: string]: EntityDefinition;
+}
+
+export interface EntityDefinition {
+  [ANCESTOR_ENTITIES]?: string[];
+  [TABLE_INDEX]?: TableIndex[];
+  [columnName: string]: ColumnDefinition;
 }
 
 export interface TableIndex {
