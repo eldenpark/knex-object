@@ -40,16 +40,15 @@
     }
   },
   "license": "ISC",
-  "name": "knex-object",
   "private": true,
   "scripts": {
     "build": "node ./scripts/builder",
     "eslint": "npx eslint . --ext .ts,.tsx,.js,.jsx",
     "launch": "yarn lerna bootstrap && node ./scripts/launcher",
     "lerna": "node ./node_modules/.bin/lerna",
+    "migrate": "yarn run launch --process migrate",
     "postinstall": "echo \"Most likely you need to run 'yarn run setup'.\"",
-    "prepublish": "yarn build",
-    "sandbox": "yarn run launch -p sandbox",
+    "sandbox": "yarn run launch --process sandbox",
     "setup": "yarn install && yarn lerna exec yarn install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

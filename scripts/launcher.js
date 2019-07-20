@@ -1,45 +1,54 @@
 const { argv } = require('yargs');
 const childProcess = require('child_process');
-const fs = require('fs');
 const { logger } = require('jege/server');
-const path = require('path');
 
-const { requireNonNull } = require('./scriptUtils');
+const log = logger('[monorepo-knex-object]');
 
-const log = logger('[knex-object]');
+const processDefinitions = {
+  migrate: [
+    'node',
+    [
+      './scripts/migrate.js',
+    ],
+    {
+      cwd: './packages/sandbox',
+      stdio: 'inherit',
+    },
+  ],
+  sandbox: [
+    'node',
+    [
+      './scripts/launch.js',
+      ...argv._,
+    ],
+    {
+      cwd: `./packages/sandbox`,
+      stdio: 'inherit',
+    },
+  ],
+};
 
 function launcher() {
   try {
-    log('launcher(): argv: %j', argv);
-
-    requireNonNull(argv.p, 'You should provide "-p" with package name');
-
-    const cwdForLaunch = path.resolve(__dirname, '../packages', argv.p);
-    const launchFileRelativePath = './scripts/launch.js';
-    const launchFilePath = path.resolve(cwdForLaunch, launchFileRelativePath);
-    log('launcher(): launchFilePath: %s, cwdForLaunch: %s', launchFilePath, cwdForLaunch);
-
-    if (!fs.existsSync(launchFilePath)) {
-      throw new Error('launch file does not exist');
-    }
-
-    const launch = childProcess.spawn(
-      'node',
-      [
-        './scripts/launch.js',
-        ...argv._,
-      ],
-      {
-        cwd: `./packages/${argv.p}`,
-        stdio: 'inherit',
-      },
+    log(
+      'launcher(): Defined processe names: %j, argv: %j',
+      Object.keys(processDefinitions),
+      argv,
     );
 
-    launch.on('error', (err) => {
-      log('launcher(): error in process: $s, error: $o', argv.p, err);
-    });
+    if (argv.process) {
+      log('launcher(): starting only this process: %s', argv.process);
+      const processDefinition = processDefinitions[argv.process];
+      childProcess.spawn(...processDefinition);
+    } else {
+      Object.entries(processDefinitions)
+        .forEach(([processName, processDefinition]) => {
+          log('launcher(): starting processName: %s', processName);
+          childProcess.spawn(...processDefinition);
+        });
+    }
   } catch (err) {
-    log('launcher(): Error reading file', err);
+    log('launcher(): error reading file', err);
   }
 }
 
