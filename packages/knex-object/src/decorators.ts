@@ -16,7 +16,7 @@ import {
 const log = logger('[knex-object]');
 
 const insignificantPropertyValue = {
-  __generatedFieldNotTobeUsed: 1,
+  __knexEntityGeneratedField: 1,
 };
 
 export function Column(columnArgs: ColumnArgs) {
@@ -78,7 +78,7 @@ export function Column(columnArgs: ColumnArgs) {
 
 export function Table({
   index,
-}: TableArgs) {
+}: TableArgs = {}) {
   // `...args` to prevent TypeScript warning which has different decorator spec
   return function TableDecorator(target, ...args) { // eslint-disable-line
     const { elements, kind } = target as ClassElement;
@@ -102,7 +102,7 @@ export function Table({
         }
         const ancestorEntities = getAncestorEntities(this);
         this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES] = ancestorEntities;
-        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index;
+        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index || [];
 
         log(
           `Table(): decorated ${chalk.green('%s')}, tableName: %s, entityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
@@ -141,7 +141,7 @@ function getAncestorEntities(entity: typeof KnexEntity) {
     getPrototypeRecursive(Object.getPrototypeOf(obj));
   }
 
-  getPrototypeRecursive(entity.prototype);
+  getPrototypeRecursive(Object.getPrototypeOf(entity.prototype));
   return ancestors;
 }
 

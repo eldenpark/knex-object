@@ -6,6 +6,7 @@ import {
 import { logger } from 'jege/server';
 
 import Bar from '@@src/entities/BarTar';
+import Baz from '@@src/entities/Baz';
 import Foo from '@@src/entities/FooTar';
 import knex from '@@src/knex';
 
@@ -13,6 +14,7 @@ const log = logger('[sandbox]');
 
 const entities: typeof KnexEntity[] = [
   Bar,
+  Baz,
   Foo,
 ];
 
