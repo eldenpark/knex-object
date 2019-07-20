@@ -16,6 +16,12 @@ class Baz extends MiddleEntity {
     type: ['enu', [Object.values(TestEnum)]],
   })
   baz_column1: string;
+
+  @Column({
+    index: [],
+    type: ['string'],
+  })
+  baz_column2: string;
 }
 
 export default Baz;

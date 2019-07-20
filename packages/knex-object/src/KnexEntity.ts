@@ -73,6 +73,7 @@ export interface TableIndex {
 export interface ColumnDefinition {
   comment?: [string];
   defaultTo?: [any];
+  index?: [string?];
   notNullable?: boolean;
   primary?: boolean;
   type: DataType;
