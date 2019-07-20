@@ -4,7 +4,7 @@
     "chalk": "^2.4.2",
     "jege": "^0.4.0",
     "knex": "^0.19.0",
-    "knex-object": "^0.3.0",
+    "knex-object": "^0.4.0",
     "pg": "^7.11.0"
   },
   "devDependencies": {
@@ -20,5 +20,5 @@
     "url": "https://github.com/eldeni/knex-object.git",
     "directory": "packages/sandbox"
   },
-  "version": "0.3.0"
+  "version": "0.4.0"
 }
