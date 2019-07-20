@@ -105,7 +105,7 @@ export function Table({
         this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index || [];
 
         log(
-          `Table(): decorated ${chalk.green('%s')}, tableName: %s, entityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
+          `@Table(): decorated ${chalk.green('%s')}, tableName: %s, entityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
           entityName,
           this.tableName,
           this[SHARED_ENTITY_DEFINITIONS][entityName],
