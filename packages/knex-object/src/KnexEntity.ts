@@ -5,6 +5,7 @@ import {
   ANCESTOR_ENTITIES,
   IS_KNEX_ENTITY,
   KNEX,
+  KNEX_TABLE,
   SHARED_ENTITY_DEFINITIONS,
   TABLE_INDEX,
 } from './constants';
@@ -19,8 +20,11 @@ class KnexEntity {
 
   static get knex(): Knex {
     if (this[KNEX] === undefined) {
-      log('KnexEntity(): knex() is not defined, object: %s', this.name);
-      throw new Error('knex() is not defined');
+      log(
+        'KnexEntity(): knex is undefined. Most likely Entity is initialized wrongfully',
+        this.name,
+      );
+      throw new Error('knex is undefined');
     }
     return this[KNEX];
   }
@@ -42,6 +46,15 @@ class KnexEntity {
 
   static get tableName(): string {
     return toSnakeCase(this.name);
+  }
+
+  static query(): Knex.QueryBuilder {
+    const knexTable = this[KNEX_TABLE];
+    if (!knexTable) {
+      log(`query(): Object is not 'Table' entity. Did you decorate with @Table?: %s`, this.name);
+      throw new Error('not Table entity');
+    }
+    return this[KNEX](this.tableName);
   }
 }
 

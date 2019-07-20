@@ -8,6 +8,7 @@ import KnexEntity, {
 } from './KnexEntity';
 import {
   IS_KNEX_ENTITY,
+  KNEX_TABLE,
   SHARED_ENTITY_DEFINITIONS,
   TABLE_INDEX,
   ANCESTOR_ENTITIES,
@@ -112,9 +113,12 @@ export function Table({
           this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES],
           this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX],
         );
-        return insignificantPropertyValue;
+        return {
+          __knexGeneratedField: 1,
+          entityName,
+        };
       },
-      key: TABLE_INDEX,
+      key: KNEX_TABLE,
       kind: 'field',
       placement: 'static',
     };

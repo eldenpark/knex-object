@@ -1,5 +1,6 @@
 const ANCESTOR_ENTITIES = Symbol('ancestoryEntites');
 const IS_KNEX_ENTITY = Symbol('isKnexEntity');
+const KNEX_TABLE = Symbol('knexTable');
 const KNEX = Symbol('knex');
 const PROTOTYPE_PROBE_DELIMITER = Symbol('prototypeProbeDelimiter');
 const SHARED_ENTITY_DEFINITIONS = Symbol('sharedEntityDefinitions');
@@ -9,6 +10,7 @@ export {
   ANCESTOR_ENTITIES,
   IS_KNEX_ENTITY,
   KNEX,
+  KNEX_TABLE,
   PROTOTYPE_PROBE_DELIMITER,
   SHARED_ENTITY_DEFINITIONS,
   TABLE_INDEX,
