@@ -48,6 +48,7 @@
     "launch": "yarn lerna bootstrap && node ./scripts/launcher",
     "lerna": "node ./node_modules/.bin/lerna",
     "postinstall": "echo \"Most likely you need to run 'yarn run setup'.\"",
+    "prepublish": "yarn build",
     "sandbox": "yarn run launch -p sandbox",
     "setup": "yarn install && yarn lerna exec yarn install",
     "test": "echo \"Error: no test specified\" && exit 1"
