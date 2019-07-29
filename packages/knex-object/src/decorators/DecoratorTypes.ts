@@ -1,6 +1,6 @@
 import {
   TableIndex,
-} from '../KnexEntity';
+} from '../entities/KnexEntityTypes';
 
 export interface TableArgs {
   index?: TableIndex[];

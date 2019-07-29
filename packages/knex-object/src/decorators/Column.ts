@@ -2,12 +2,13 @@ import {
   ClassMemberElement,
 } from './DecoratorTypes';
 import {
-  IS_COLUMN,
-} from '../constants';
-import KnexEntity, {
   ColumnType,
   ColumnDefinition,
-} from '../KnexEntity';
+} from '../entities/KnexEntityTypes';
+import {
+  IS_COLUMN,
+} from '../constants';
+import KnexEntity from '../entities/KnexEntity';
 
 export default function Column(columnDefinition: ColumnDefinition) {
   // `...args` to prevent TypeScript warning which has different decorator spec

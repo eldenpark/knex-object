@@ -11,9 +11,8 @@ import {
   IS_COLUMN,
   IS_ENTITY,
 } from '../constants';
-import KnexEntity, {
-  EntityDefinition,
-} from '../KnexEntity';
+import { EntityDefinition } from '../entities/KnexEntityTypes';
+import KnexEntity from '../entities/KnexEntity';
 
 const log = logger('[knex-object]');
 

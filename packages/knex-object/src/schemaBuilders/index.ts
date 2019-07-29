@@ -2,11 +2,12 @@ import chalk from 'chalk';
 import Knex from 'knex';
 import { logger } from 'jege/server';
 
-import KnexEntity, {
+import {
   ColumnType,
   DataType,
   TableIndex,
-} from '../KnexEntity';
+} from '../entities/KnexEntityTypes';
+import KnexEntity from '../entities/KnexEntity';
 import { requireNonNull } from '../utils';
 
 const log = logger('[knex-object]');
