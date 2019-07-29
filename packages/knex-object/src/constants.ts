@@ -1,17 +1,13 @@
-const ANCESTOR_ENTITIES = Symbol('ancestoryEntites');
-const IS_KNEX_ENTITY = Symbol('isKnexEntity');
-const KNEX_TABLE = Symbol('knexTable');
-const KNEX = Symbol('knex');
-const PROTOTYPE_PROBE_DELIMITER = Symbol('prototypeProbeDelimiter');
-const SHARED_ENTITY_DEFINITIONS = Symbol('sharedEntityDefinitions');
-const TABLE_INDEX = Symbol('tableIndex');
+const knexObject = '__knex_object__';
+
+const IS_COLUMN = Symbol(`${knexObject}isColumn`);
+const ENTITY_DEFINITION = Symbol(`${knexObject}entityDefinition`);
+const IS_ENTITY = Symbol(`${knexObject}isEntity`);
+const KNEX = Symbol(`${knexObject}knex`);
 
 export {
-  ANCESTOR_ENTITIES,
-  IS_KNEX_ENTITY,
+  ENTITY_DEFINITION,
+  IS_COLUMN,
+  IS_ENTITY,
   KNEX,
-  KNEX_TABLE,
-  PROTOTYPE_PROBE_DELIMITER,
-  SHARED_ENTITY_DEFINITIONS,
-  TABLE_INDEX,
 };

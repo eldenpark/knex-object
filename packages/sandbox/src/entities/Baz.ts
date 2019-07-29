@@ -22,6 +22,11 @@ class Baz extends MiddleEntity {
     type: ['string'],
   })
   baz_column2: string;
+
+  @Column({
+    type: ['string'],
+  })
+  name: string;
 }
 
 export default Baz;

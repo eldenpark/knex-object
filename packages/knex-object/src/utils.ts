@@ -1,4 +1,4 @@
-export function toSnakeCase(str) {
+export function toSnakeCase(str): string {
   return str.replace(/(?:^|\.?)([A-Z])/g, (x, y) => '_' + y.toLowerCase())
     .replace(/^_/, '');
 }

@@ -2,25 +2,20 @@ import chalk from 'chalk';
 import { logger } from 'jege/server';
 
 import KnexEntity, {
+  ColumnType,
   ColumnDefinition,
   TableIndex,
   EntityDefinition,
 } from './KnexEntity';
 import {
-  IS_KNEX_ENTITY,
-  KNEX_TABLE,
-  SHARED_ENTITY_DEFINITIONS,
-  TABLE_INDEX,
-  ANCESTOR_ENTITIES,
+  ENTITY_DEFINITION,
+  IS_COLUMN,
+  IS_ENTITY,
 } from './constants';
 
 const log = logger('[knex-object]');
 
-const insignificantPropertyValue = {
-  __knexEntityGeneratedField: 1,
-};
-
-export function Column(columnArgs: ColumnArgs) {
+export function Column(columnDefinition: ColumnDefinition) {
   // `...args` to prevent TypeScript warning which has different decorator spec
   return function ColumnDecorator(target, ...args) { // eslint-disable-line
     const {
@@ -37,28 +32,20 @@ export function Column(columnArgs: ColumnArgs) {
       throw new Error(`ColumnDecorator(): '@Column' should be put onto instance variable`);
     }
 
-    function initializer(this: typeof KnexEntity) {
-      const entityName = this.name;
-      if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
-        throw new Error(
-          `ColumnDecorator(): '@Column may have attached onto non KnexEntity, ${this.name}`,
-        );
-      }
+    function initializer(this: typeof KnexEntity): ColumnType {
+      const entityName = this.prototype.constructor.name;
 
-      if (this[SHARED_ENTITY_DEFINITIONS][entityName] === undefined) {
-        this[SHARED_ENTITY_DEFINITIONS][entityName] = {
-          [key]: columnArgs,
-        } as EntityDefinition;
-      } else {
-        this[SHARED_ENTITY_DEFINITIONS][entityName][key as any] = columnArgs;
-      }
-
-      return insignificantPropertyValue;
+      return {
+        columnDefinition,
+        entityName,
+        [IS_COLUMN]: true,
+        propertyName: key.toString(),
+      };
     }
 
     const newDescriptor = {
       configurable: false,
-      enumerable: false,
+      enumerable: true,
       writable: false,
     };
 
@@ -68,7 +55,7 @@ export function Column(columnArgs: ColumnArgs) {
         {
           descriptor: newDescriptor,
           initializer,
-          key,
+          key: `__knex_object__${key.toString()}`,
           kind: 'field',
           placement: 'static',
         },
@@ -79,6 +66,7 @@ export function Column(columnArgs: ColumnArgs) {
 
 export function Table({
   index,
+  tableName,
 }: TableArgs = {}) {
   // `...args` to prevent TypeScript warning which has different decorator spec
   return function TableDecorator(target, ...args) { // eslint-disable-line
@@ -91,34 +79,27 @@ export function Table({
     const newElement: ClassMemberElement = {
       descriptor: {
         configurable: false,
-        enumerable: false,
+        enumerable: true,
         writable: false,
       },
-      initializer: function initializer() {
-        const entityName = this.name;
-        if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
-          throw new Error(
-            `ColumnDecorator(): '@Table may have attached onto non KnexEntity, ${this.name}`,
-          );
-        }
-        const ancestorEntities = getAncestorEntities(this);
-        this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES] = ancestorEntities;
-        this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX] = index || [];
+      initializer: function initializer(): EntityDefinition {
+        const entities = getPrototypeEntityConstructors(this);
+        const columns = createColumnDefinitions(entities);
+        const entityDefinition: EntityDefinition = {
+          columns,
+          index,
+          tableName,
+        };
 
         log(
-          `@Table(): decorated ${chalk.green('%s')}, tableName: %s, entityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
-          entityName,
-          this.tableName,
-          this[SHARED_ENTITY_DEFINITIONS][entityName],
-          this[SHARED_ENTITY_DEFINITIONS][entityName][ANCESTOR_ENTITIES],
-          this[SHARED_ENTITY_DEFINITIONS][entityName][TABLE_INDEX],
+          `@Table(): decorated ${chalk.green('%s')}, entityDefinition: %j`,
+          this.name,
+          entityDefinition,
         );
-        return {
-          __knexGeneratedField: 1,
-          entityName,
-        };
+
+        return entityDefinition;
       },
-      key: KNEX_TABLE,
+      key: ENTITY_DEFINITION,
       kind: 'field',
       placement: 'static',
     };
@@ -133,26 +114,39 @@ export function Table({
   };
 }
 
-function getAncestorEntities(entity: typeof KnexEntity) {
-  const ancestors: string[] = [];
+function createColumnDefinitions(entities) {
+  const columns = {};
+  entities.forEach((entity) => {
+    Object.entries(entity)
+      .forEach(([key, value]: any) => {
+        if (value[IS_COLUMN]) {
+          columns[key] = value;
+        }
+      });
+  });
+  return columns;
+}
+
+function getPrototypeEntityConstructors(entity: typeof KnexEntity) {
+  const ancestors: any[] = [];
   function getPrototypeRecursive(obj) {
     const constructorName = obj.constructor.name;
-    if (!obj.constructor[IS_KNEX_ENTITY]
+    if (!obj.constructor[IS_ENTITY]
       || constructorName === 'DO_NOT_CHANGE__generatedKnexEntity') {
       return;
     }
-    ancestors.push(obj.constructor.name);
     getPrototypeRecursive(Object.getPrototypeOf(obj));
+    ancestors.push(obj.constructor);
   }
 
   getPrototypeRecursive(Object.getPrototypeOf(entity.prototype));
+  ancestors.push(entity);
   return ancestors;
 }
 
-type ColumnArgs = ColumnDefinition;
-
 interface TableArgs {
   index?: TableIndex[];
+  tableName?: string;
 }
 
 interface ClassElement {

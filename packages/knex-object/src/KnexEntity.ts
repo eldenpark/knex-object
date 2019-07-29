@@ -2,21 +2,18 @@ import Knex from 'knex';
 import { logger } from 'jege/server';
 
 import {
-  ANCESTOR_ENTITIES,
-  IS_KNEX_ENTITY,
+  ENTITY_DEFINITION,
+  IS_COLUMN,
+  IS_ENTITY,
   KNEX,
-  KNEX_TABLE,
-  SHARED_ENTITY_DEFINITIONS,
-  TABLE_INDEX,
 } from './constants';
 import { toSnakeCase } from './utils';
 
 const log = logger('[knex-object]');
 
 class KnexEntity {
-  static [IS_KNEX_ENTITY] = true;
+  static [IS_ENTITY] = true;
   static [KNEX]: Knex;
-  static [SHARED_ENTITY_DEFINITIONS]: SharedEntityDefinitions = {};
 
   static get knex(): Knex {
     if (this[KNEX] === undefined) {
@@ -33,28 +30,29 @@ class KnexEntity {
     this[KNEX] = knex;
   }
 
-  static get entityDefinitions() {
-    if (this[SHARED_ENTITY_DEFINITIONS] === undefined) {
-      log(
-        'entityDefinitions(): __tableDefinition is missing. Most likely it is mishandled. object: %s',
-        this.name,
-      );
-      throw new Error('tableDefinition() is missing');
+  static get entityDefinition(): EntityDefinition {
+    const entityDefinition = this[ENTITY_DEFINITION];
+    if (entityDefinition === undefined) {
+      throw new Error('get entityDefinition(): not defined, possible this object is not Knext Entity');
     }
-    return this[SHARED_ENTITY_DEFINITIONS];
+    return entityDefinition;
   }
 
   static get tableName(): string {
-    return toSnakeCase(this.name);
+    const tableNameInEntityDefinition = this[ENTITY_DEFINITION].tableName;
+    if (tableNameInEntityDefinition) {
+      return tableNameInEntityDefinition;
+    }
+    return toSnakeCase(this.name).toUpperCase();
   }
 
   static query(): Knex.QueryBuilder {
-    const knexTable = this[KNEX_TABLE];
-    if (!knexTable) {
+    const { tableName } = this;
+    if (!tableName) {
       log(`query(): Object is not 'Table' entity. Did you decorate with @Table?: %s`, this.name);
       throw new Error('not Table entity');
     }
-    return this[KNEX](this.tableName);
+    return this[KNEX](tableName);
   }
 }
 
@@ -73,15 +71,24 @@ export interface SharedEntityDefinitions {
 }
 
 export interface EntityDefinition {
-  [ANCESTOR_ENTITIES]?: string[];
-  [TABLE_INDEX]?: TableIndex[];
-  [columnName: string]: ColumnDefinition;
+  columns: {
+    [columnName: string]: ColumnType;
+  };
+  index?: TableIndex[];
+  tableName?: string;
 }
 
 export interface TableIndex {
   columns: string[];
   key?: string;
 }
+
+export type ColumnType = {
+  [IS_COLUMN]: true;
+  columnDefinition: ColumnDefinition;
+  entityName: string;
+  propertyName: string;
+};
 
 export interface ColumnDefinition {
   comment?: [string];

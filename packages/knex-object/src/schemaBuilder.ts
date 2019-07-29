@@ -3,16 +3,11 @@ import Knex from 'knex';
 import { logger } from 'jege/server';
 
 import KnexEntity, {
+  ColumnType,
   DataType,
-  EntityDefinition,
-  SharedEntityDefinitions,
   TableIndex,
 } from './KnexEntity';
 import { requireNonNull } from './utils';
-import {
-  ANCESTOR_ENTITIES,
-  TABLE_INDEX,
-} from './constants';
 
 const log = logger('[knex-object]');
 
@@ -21,23 +16,20 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
     let knexSchemaBuilder = knex.schema;
     entities.forEach((entity) => {
       const {
-        entityDefinitions,
+        entityDefinition,
         name: entityName,
       } = entity;
-      const aggregateEntityDefinition = aggreteEntityDefinition(entityName, entityDefinitions);
 
       log(
-        `schemaBuilder(): entity ${chalk.green('%s')}, tableName: %s, aggregateEntityDefinition: %j, ancestorEntities: %j, tableIndex: %j`,
+        `schemaBuilder(): entity ${chalk.green('%s')}, tableName: %s, entityDefinition: %j`,
         entityName,
         entity.tableName,
-        aggregateEntityDefinition,
-        aggregateEntityDefinition[ANCESTOR_ENTITIES],
-        aggregateEntityDefinition[TABLE_INDEX],
+        entityDefinition,
       );
 
       knexSchemaBuilder = knexSchemaBuilder.createTable(entity.tableName, (table) => {
-        appendTableColumns(table, aggregateEntityDefinition);
-        appendTableIndices(table, aggregateEntityDefinition[TABLE_INDEX]);
+        appendTableColumns(table, entityDefinition.columns);
+        appendTableIndices(table, entityDefinition.index);
       });
     });
     return knexSchemaBuilder;
@@ -59,58 +51,34 @@ export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
   };
 }
 
-function appendTableColumns(table: Knex.CreateTableBuilder, entityDefinition: EntityDefinition) {
-  Object.entries(entityDefinition)
-    .forEach(([columnName, columnDefinition]) => {
+function appendTableColumns(table: Knex.CreateTableBuilder, columns: Columns) {
+  Object.entries(columns)
+    .forEach(([, column]) => {
+      const { columnDefinition, propertyName } = column;
       const [typeLabel, typeFnArgs]: DataType = columnDefinition.type;
       requireNonNull(typeLabel, 'type label, e.g. float(), should be confifugured');
       const knexColumnBuilder: Knex.ColumnBuilder = table[typeLabel](
-        columnName,
+        propertyName,
         ...(typeFnArgs || []),
       );
 
       Object.entries(columnDefinition)
-        .forEach(([columnModifier, columnMidifierArgs]) => {
+        .forEach(([columnModifier, columnModifierArgs]) => {
           if (columnModifier !== 'type') {
-            const fnArgs = columnMidifierArgs.length ? columnMidifierArgs : [];
+            const fnArgs = columnModifierArgs.length ? columnModifierArgs : [];
             knexColumnBuilder[columnModifier](...fnArgs);
           }
         });
     });
 }
 
-function appendTableIndices(table: Knex.CreateTableBuilder, tableIndices?: TableIndex[]) {
-  let _table = table;
-  if (tableIndices) {
-    tableIndices.forEach(({ columns, key }) => {
-      _table = _table.index(columns, key);
-    });
-  }
-  return _table;
+function appendTableIndices(table: Knex.CreateTableBuilder, tableIndices: TableIndex[] = []) {
+  tableIndices.forEach(({ columns, key }) => {
+    table.index(columns, key);
+  });
+  return table;
 }
 
-function aggreteEntityDefinition(entityName: string, entityDefinitions: SharedEntityDefinitions) {
-  const entityDefinition = entityDefinitions[entityName];
-  requireNonNull(entityDefinition, 'aggreteEntityDefinition(): entityDefinition should exist');
-
-  let aggregateEntityDefinition: EntityDefinition = {
-    [TABLE_INDEX]: [],
-  };
-
-  if (entityDefinition[ANCESTOR_ENTITIES]) {
-    entityDefinition[ANCESTOR_ENTITIES]!.forEach((ancestor) => {
-      const tableIndex = entityDefinitions[ancestor][TABLE_INDEX];
-      if (tableIndex) {
-        aggregateEntityDefinition[TABLE_INDEX]!.concat(tableIndex);
-      }
-      aggregateEntityDefinition = {
-        ...aggregateEntityDefinition,
-        ...entityDefinitions[ancestor],
-      };
-    });
-  }
-  return {
-    ...aggregateEntityDefinition,
-    ...entityDefinition,
-  };
-}
+type Columns = {
+  [columnName: string]: ColumnType;
+};
