@@ -5,6 +5,7 @@ import {
   ENTITY_DEFINITION,
   IS_ENTITY,
   KNEX,
+  NEVER_ASSIGN,
 } from '../constants';
 import { EntityDefinition } from './KnexEntityTypes';
 import { toSnakeCase } from '../utils';
@@ -12,6 +13,7 @@ import { toSnakeCase } from '../utils';
 const log = logger('[knex-object]');
 
 class KnexEntity {
+  static tableName = { [NEVER_ASSIGN]: true };
   static [IS_ENTITY] = true;
   static [KNEX]: Knex;
 
