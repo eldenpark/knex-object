@@ -38,8 +38,9 @@ class KnexEntity {
     return entityDefinition;
   }
 
-  static get tableName(): string {
+  static getTableName(): string {
     const tableNameInEntityDefinition = this[ENTITY_DEFINITION].tableName;
+
     if (tableNameInEntityDefinition) {
       return tableNameInEntityDefinition;
     }
@@ -47,7 +48,7 @@ class KnexEntity {
   }
 
   static query(): Knex.QueryBuilder {
-    const { tableName } = this;
+    const tableName = this.getTableName();
     if (!tableName) {
       log(`query(): Object is not 'Table' entity. Did you decorate with @Table?: %s`, this.name);
       throw new Error('not Table entity');

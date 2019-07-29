@@ -19,15 +19,16 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
         entityDefinition,
         name: entityName,
       } = entity;
+      const tableName = entity.getTableName();
 
       log(
         `schemaBuilder(): entity ${chalk.green('%s')}, tableName: %s, entityDefinition: %j`,
         entityName,
-        entity.tableName,
+        tableName,
         entityDefinition,
       );
 
-      knexSchemaBuilder = knexSchemaBuilder.createTable(entity.tableName, (table) => {
+      knexSchemaBuilder = knexSchemaBuilder.createTable(tableName, (table) => {
         appendTableColumns(table, entityDefinition.columns);
         appendTableIndices(table, entityDefinition.index);
       });
@@ -40,12 +41,13 @@ export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
   return function schemaDestroyer(knex: Knex) {
     let chained = knex.schema;
     entities.forEach((entity) => {
+      const tableName = entity.getTableName();
       log(
         `schemaDestroyer(): destroying if exists, entity: ${chalk.green('%s')}, tableName: %s`,
         entity.name,
-        entity.tableName,
+        tableName,
       );
-      chained = chained.dropTableIfExists(entity.tableName);
+      chained = chained.dropTableIfExists(tableName);
     });
     return chained;
   };

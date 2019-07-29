@@ -11,10 +11,9 @@ import Entity from '@@src/entities/Entity';
       columns: ['foo_tar_column1'],
     },
   ],
+  tableName: 'foo_tar_custom_name',
 })
 class FooTar extends Entity {
-  static tableName = 'foo_tar_custom_name';
-
   @Column({
     defaultTo: ['power'],
     type: ['string', [255]],
