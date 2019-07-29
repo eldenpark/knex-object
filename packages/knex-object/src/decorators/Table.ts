@@ -1,70 +1,23 @@
 import chalk from 'chalk';
 import { logger } from 'jege/server';
 
-import KnexEntity, {
-  ColumnType,
-  ColumnDefinition,
-  TableIndex,
-  EntityDefinition,
-} from './KnexEntity';
+import {
+  ClassElement,
+  ClassMemberElement,
+  TableArgs,
+} from './DecoratorTypes';
 import {
   ENTITY_DEFINITION,
   IS_COLUMN,
   IS_ENTITY,
-} from './constants';
+} from '../constants';
+import KnexEntity, {
+  EntityDefinition,
+} from '../KnexEntity';
 
 const log = logger('[knex-object]');
 
-export function Column(columnDefinition: ColumnDefinition) {
-  // `...args` to prevent TypeScript warning which has different decorator spec
-  return function ColumnDecorator(target, ...args) { // eslint-disable-line
-    const {
-      key,
-      kind,
-      placement,
-    } = target as ClassMemberElement;
-
-    if (kind !== 'field') {
-      throw new Error(`ColumnDecorator(): '@Column' should be put onto field`);
-    }
-
-    if (placement !== 'own') {
-      throw new Error(`ColumnDecorator(): '@Column' should be put onto instance variable`);
-    }
-
-    function initializer(this: typeof KnexEntity): ColumnType {
-      const entityName = this.prototype.constructor.name;
-
-      return {
-        columnDefinition,
-        entityName,
-        [IS_COLUMN]: true,
-        propertyName: key.toString(),
-      };
-    }
-
-    const newDescriptor = {
-      configurable: false,
-      enumerable: true,
-      writable: false,
-    };
-
-    return {
-      ...target,
-      extras: [
-        {
-          descriptor: newDescriptor,
-          initializer,
-          key: `__knex_object__${key.toString()}`,
-          kind: 'field',
-          placement: 'static',
-        },
-      ],
-    };
-  };
-}
-
-export function Table({
+export default function Table({
   index,
   tableName,
 }: TableArgs = {}) {
@@ -142,29 +95,4 @@ function getPrototypeEntityConstructors(entity: typeof KnexEntity) {
   getPrototypeRecursive(Object.getPrototypeOf(entity.prototype));
   ancestors.push(entity);
   return ancestors;
-}
-
-interface TableArgs {
-  index?: TableIndex[];
-  tableName?: string;
-}
-
-interface ClassElement {
-  elements: ClassMemberElement[];
-  kind: string;
-}
-
-interface ClassMemberElement {
-  descriptor: ElementDescriptor;
-  initializer: () => any;
-  key: string | symbol;
-  kind: string;
-  placement: string;
-}
-
-interface ElementDescriptor {
-  configurable: boolean;
-  enumerable: boolean;
-  value?: any;
-  writable: boolean;
 }

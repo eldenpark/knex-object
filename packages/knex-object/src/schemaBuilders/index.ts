@@ -6,8 +6,8 @@ import KnexEntity, {
   ColumnType,
   DataType,
   TableIndex,
-} from './KnexEntity';
-import { requireNonNull } from './utils';
+} from '../KnexEntity';
+import { requireNonNull } from '../utils';
 
 const log = logger('[knex-object]');
 
