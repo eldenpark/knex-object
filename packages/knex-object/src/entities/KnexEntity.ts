@@ -46,7 +46,7 @@ class KnexEntity {
     if (tableNameInEntityDefinition) {
       return tableNameInEntityDefinition;
     }
-    return toSnakeCase(this.name).toUpperCase();
+    return toSnakeCase(this.name);
   }
 
   static query(): Knex.QueryBuilder {
