@@ -1,11 +1,11 @@
 const { argv } = require('yargs');
-const childProcess = require('child_process');
+const { createLauncher, proc } = require('process-launch');
 const { logger } = require('jege/server');
 
 const log = logger('[monorepo-knex-object]');
 
 const processDefinitions = {
-  migrate: [
+  migrate: proc(
     'node',
     [
       './scripts/migrate.js',
@@ -14,8 +14,8 @@ const processDefinitions = {
       cwd: './packages/sandbox',
       stdio: 'inherit',
     },
-  ],
-  sandbox: [
+  ),
+  sandbox: proc(
     'node',
     [
       './scripts/launch.js',
@@ -25,7 +25,7 @@ const processDefinitions = {
       cwd: `./packages/sandbox`,
       stdio: 'inherit',
     },
-  ],
+  ),
 };
 
 function launcher() {
@@ -36,19 +36,14 @@ function launcher() {
       argv,
     );
 
-    if (argv.process) {
-      log('launcher(): starting only this process: %s', argv.process);
-      const processDefinition = processDefinitions[argv.process];
-      childProcess.spawn(...processDefinition);
-    } else {
-      Object.entries(processDefinitions)
-        .forEach(([processName, processDefinition]) => {
-          log('launcher(): starting processName: %s', processName);
-          childProcess.spawn(...processDefinition);
-        });
-    }
+    const Launcher = createLauncher({
+      processDefinitions,
+    });
+    Launcher.run({
+      process: argv.process,
+    });
   } catch (err) {
-    log('launcher(): error reading file', err);
+    log('launcher(): error launching', err);
   }
 }
 

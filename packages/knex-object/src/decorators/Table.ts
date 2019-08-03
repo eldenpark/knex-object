@@ -11,6 +11,7 @@ import {
   IS_ENTITY,
 } from '../constants';
 import { EntityDefinition } from '../entities/KnexEntityTypes';
+import { getPrintableEntityDefinition } from '../utils';
 import KnexEntity from '../entities/KnexEntity';
 
 const log = logger('[knex-object]');
@@ -45,7 +46,7 @@ export default function Table({
         log(
           `@Table(): decorated [[ %s ]], entityDefinition: %j`,
           this.name,
-          entityDefinition,
+          getPrintableEntityDefinition(entityDefinition),
         );
 
         return entityDefinition;

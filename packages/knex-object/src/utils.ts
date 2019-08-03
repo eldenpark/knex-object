@@ -21,7 +21,7 @@ export function getPrintableEntityDefinition(
         return '[circular]';
       }
 
-      if (obj.constructor.name === 'Raw' ) {
+      if (obj.constructor.name === 'Raw' && obj.sql !== undefined) {
         return '[knexProperty]';
       }
 
