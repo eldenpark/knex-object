@@ -15,6 +15,7 @@ import Entity from '@@src/entities/Entity';
 })
 class BarTar extends Entity {
   @Column({
+    defaultTo: ['power'],
     type: ['string', [255]],
   })
   bar_tar_column1: string;

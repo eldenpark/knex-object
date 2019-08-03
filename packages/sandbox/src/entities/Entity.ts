@@ -11,6 +11,7 @@ const Entity: typeof KnexEntity = KnexEntityFactory({
 
 class EntityBase extends Entity {
   @Column({
+    defaultTo: [knexInstance.fn.now()],
     type: ['timestamp'],
   })
   created_at: Date;

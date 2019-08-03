@@ -8,14 +8,18 @@ import {
   NEVER_ASSIGN,
 } from '../constants';
 import { EntityDefinition } from './KnexEntityTypes';
-import { toSnakeCase } from '../utils';
+import {
+  getPrintableEntityDefinition,
+  toSnakeCase,
+} from '../utils';
 
 const log = logger('[knex-object]');
 
 class KnexEntity {
-  static tableName = { [NEVER_ASSIGN]: true };
+  static [ENTITY_DEFINITION]: EntityDefinition;
   static [IS_ENTITY] = true;
   static [KNEX]: Knex;
+  static tableName = { [NEVER_ASSIGN]: true };
 
   static get knex(): Knex {
     if (this[KNEX] === undefined) {
@@ -32,12 +36,13 @@ class KnexEntity {
     this[KNEX] = knex;
   }
 
-  static get entityDefinition(): EntityDefinition {
+  static getEntityDefinition(printable = true): EntityDefinition {
     const entityDefinition = this[ENTITY_DEFINITION];
     if (entityDefinition === undefined) {
-      throw new Error('get entityDefinition(): not defined, possible this object is not Knext Entity');
+      throw new Error('get entityDefinition(): not defined, possible this object is not KnexEntity');
     }
-    return entityDefinition;
+
+    return printable ? getPrintableEntityDefinition(entityDefinition) : entityDefinition;
   }
 
   static getTableName(): string {

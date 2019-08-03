@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+// import chalk from 'chalk';
 import Knex from 'knex';
 import { logger } from 'jege/server';
 
@@ -17,16 +17,17 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
     let knexSchemaBuilder = knex.schema;
     entities.forEach((entity) => {
       const {
-        entityDefinition,
         name: entityName,
       } = entity;
       const tableName = entity.getTableName();
+      const printableEntityDefinition = entity.getEntityDefinition();
+      const entityDefinition = entity.getEntityDefinition(false);
 
       log(
-        `schemaBuilder(): entity ${chalk.green('%s')}, tableName: %s, entityDefinition: %j`,
+        `schemaBuilder(): build entity [[ %s ]], tableName: %s, entityDefinition: %j`,
         entityName,
         tableName,
-        entityDefinition,
+        printableEntityDefinition,
       );
 
       knexSchemaBuilder = knexSchemaBuilder.createTable(tableName, (table) => {
@@ -34,23 +35,31 @@ export function getSchemaBuilder(entities: typeof KnexEntity[]) {
         appendTableIndices(table, entityDefinition.index);
       });
     });
+
+    const query = knexSchemaBuilder.toQuery().replace(/\n/g, ' ');
+    log('schemaBuilder(): finalized query: %s', query);
+
     return knexSchemaBuilder;
   };
 }
 
 export function getSchemaDestroyer(entities: typeof KnexEntity[]) {
   return function schemaDestroyer(knex: Knex) {
-    let chained = knex.schema;
+    let knexSchemaBuilder = knex.schema;
     entities.forEach((entity) => {
       const tableName = entity.getTableName();
       log(
-        `schemaDestroyer(): destroying if exists, entity: ${chalk.green('%s')}, tableName: %s`,
+        `schemaDestroyer(): destroying if exists, entity: [[ %s ]], tableName: %s`,
         entity.name,
         tableName,
       );
-      chained = chained.dropTableIfExists(tableName);
+      knexSchemaBuilder = knexSchemaBuilder.dropTableIfExists(tableName);
     });
-    return chained;
+
+    const query = knexSchemaBuilder.toQuery().replace(/\n/g, ' ');
+    log('schemaDestroyer(): finalized query: %s', query);
+
+    return knexSchemaBuilder;
   };
 }
 

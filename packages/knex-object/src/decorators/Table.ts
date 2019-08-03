@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { logger } from 'jege/server';
 
 import {
@@ -44,7 +43,7 @@ export default function Table({
         };
 
         log(
-          `@Table(): decorated ${chalk.green('%s')}, entityDefinition: %j`,
+          `@Table(): decorated [[ %s ]], entityDefinition: %j`,
           this.name,
           entityDefinition,
         );

@@ -27,7 +27,7 @@ module.exports = {
   rules: {
     'arrow-body-style': ['off'],
     'arrow-parens': ['error', 'always'],
-    'dot-notation': ['error', { allowPattern: '^[^_]*([_]{2}).+' }],
+    'dot-notation': ['off'],
     'global-require': ['off'],
     'import/no-dynamic-require': ['off'],
     'import/no-extraneous-dependencies': ['error', {
@@ -52,7 +52,9 @@ module.exports = {
       }],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'sort-keys': ['error'],
-    'typescript-sort-keys/interface': 2,
+    'typescript-sort-keys/interface': ['error', 'asc', {
+      caseSensitive: false,
+    }],
     'typescript-sort-keys/string-enum': 2,
     'wrap-iife': ['error', 'inside'],
   },

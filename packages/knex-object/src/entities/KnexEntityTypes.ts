@@ -16,9 +16,9 @@ export interface TableIndex {
 }
 
 export type ColumnType = {
-  [IS_COLUMN]: true;
   columnDefinition: ColumnDefinition;
   entityName: string;
+  [IS_COLUMN]: true;
   propertyName: string;
 };
 

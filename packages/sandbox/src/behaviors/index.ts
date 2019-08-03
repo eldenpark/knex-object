@@ -7,7 +7,7 @@ const log = logger('[sandbox]');
 export default async function behavior() {
   const result = await FooTar.query()
     .insert({
-      foo_column2: 11,
+      foo_tar_column2: 11,
     })
     .returning('*');
   log('result: %s', result);

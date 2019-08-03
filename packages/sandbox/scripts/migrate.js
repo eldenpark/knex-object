@@ -5,7 +5,7 @@ const { logger } = require('jege/server');
 
 const babelRc = require('./.babelrc');
 
-const log = logger('[sandbox-api]');
+const log = logger('[sandbox]');
 
 require('@babel/register')({
   ...babelRc,
@@ -21,18 +21,18 @@ async function launchMigrate() {
   try {
     const downResult = await down(knex);
     log(
-      `launchMigrate(): down ${chalk.green('complete')}, up will follow. Command count: %s`,
+      `launchMigrate(): ${chalk.green('success')} down(), up will follow. Command count: %s`,
       downResult.length,
     );
 
     const upResult = await up(knex);
     log(
-      `launchMigrate(): up ${chalk.green('complete')}. Command count: %s`,
+      `launchMigrate(): ${chalk.green('success')} up. Command count: %s`,
       upResult.length,
     );
     process.exit(0);
   } catch (err) {
-    log('launchMigrate(): error: %o', err);
+    log(`launchMigrate(): ${chalk.red('error')}: %o`, err);
   }
 }
 
